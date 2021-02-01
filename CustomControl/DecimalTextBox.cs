@@ -80,6 +80,8 @@ namespace CustomControl
                 _CursorPosition = -1;
                 _FinishChange = true;
 
+                base.OnTextChanged(e);
+
             }
             catch
             {
@@ -105,6 +107,8 @@ namespace CustomControl
             {
                 e.Handled = true;
             }
+
+            base.OnKeyDown(e);
         }
 
         protected override void OnKeyPress(KeyPressEventArgs e)
@@ -155,6 +159,8 @@ namespace CustomControl
                 if(this.SelectionStart >0)
                     this.SelectionStart -= 1;
             }
+
+            base.OnKeyPress(e);
 
         }
     }
