@@ -57,60 +57,6 @@ namespace CustomControl
             this.Text = 0.ToString(_FormatString);
         }
 
-        protected override void OnTextChanged(EventArgs e)
-        {
-            try
-            {
-                if (_FinishChange)
-                {
-                    _CursorPosition = this.SelectionStart;
-
-                    // fix cursor position when type first value after 0
-                    if (_Value == 0 && _CursorPosition == 2)
-                        _CursorPosition -= 1;
-                }
-
-                _FinishChange = false;
-
-
-                decimal val = decimal.Parse(this.Text.Replace(",", ""));
-                string text = Floor(val, _DecimalDigit).ToString(_FormatString);
-                int commaCount = GetCharCount(',', text);
-
-                if (commaCount > _CommaCount)
-                {
-                    _CursorPosition += 1;
-                }
-                else if (commaCount < _CommaCount && _CursorPosition > 0)
-                {
-                    // move positoion if comma deleted
-                    // do only if delete single character
-                    if (_Text.Replace(",", "").Length - text.Replace(",", "").Length == 1)
-                    {
-                        _CursorPosition -= 1;
-                    }
-                }
-
-                _CommaCount = commaCount;
-
-                this.Text = text;
-
-                if (_CursorPosition != -1)
-                    this.SelectionStart = _CursorPosition;
-
-                _CursorPosition = -1;
-                _FinishChange = true;
-
-                base.OnTextChanged(e);
-
-            }
-            catch
-            {
-                if (!String.IsNullOrEmpty(this.Text))
-                    this.Text = 0.ToString(_FormatString);
-            }
-        }
-
         public static decimal Floor(decimal aValue, int aDigits)
         {
             decimal m = (decimal)Math.Pow(10, aDigits);
@@ -135,6 +81,17 @@ namespace CustomControl
             if (e.KeyCode == Keys.Delete && this.SelectionStart == this.Text.IndexOf('.'))
             {
                 e.Handled = true;
+            }
+
+            // press delete before comma
+            if (e.KeyCode == Keys.Delete && this.Text.Substring(this.SelectionStart, 1) == ",")
+            {
+                // remove comma and character after comma
+                e.Handled = true;
+                int cursorPosition = this.SelectionStart;
+                string newText = this.Text.Substring(0, this.SelectionStart) + this.Text.Substring(this.SelectionStart + 2, this.Text.Length - (this.SelectionStart + 2));
+                this.Text = newText;
+                this.SelectionStart = cursorPosition + 1;
             }
 
             base.OnKeyDown(e);
@@ -193,7 +150,61 @@ namespace CustomControl
 
         }
 
-        private void TryParseDecimal(string str)
+        protected override void OnTextChanged(EventArgs e)
+        {
+            try
+            {
+                if (_FinishChange)
+                {
+                    _CursorPosition = this.SelectionStart;
+
+                    // fix cursor position when type first value after 0
+                    if (_Value == 0 && _CursorPosition == 2)
+                        _CursorPosition -= 1;
+                }
+
+                _FinishChange = false;
+
+
+                decimal val = decimal.Parse(this.Text.Replace(",", ""));
+                string text = Floor(val, _DecimalDigit).ToString(_FormatString);
+                int commaCount = GetCharCount(',', text);
+
+                if (commaCount > _CommaCount)
+                {
+                    _CursorPosition += 1;
+                }
+                else if (commaCount < _CommaCount && _CursorPosition > 0)
+                {
+                    // move positoion if comma deleted
+                    // do only if delete single character
+                    if (_Text.Replace(",", "").Length - text.Replace(",", "").Length == 1)
+                    {
+                        _CursorPosition -= 1;
+                    }
+                }
+
+                _CommaCount = commaCount;
+
+                this.Text = text;
+
+                if (_CursorPosition != -1)
+                    this.SelectionStart = _CursorPosition;
+
+                _CursorPosition = -1;
+                _FinishChange = true;
+
+                base.OnTextChanged(e);
+
+            }
+            catch
+            {
+                if (!String.IsNullOrEmpty(this.Text))
+                    this.Text = 0.ToString(_FormatString);
+            }
+        }
+
+        private decimal TryParseDecimal(string str)
         {
             try
             {
