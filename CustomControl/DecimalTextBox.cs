@@ -77,6 +77,8 @@ namespace CustomControl
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            _Text = this.Text;
+
             // prevent delete of dot by delete button
             if (e.KeyCode == Keys.Delete && this.SelectionStart == this.Text.IndexOf('.'))
             {
@@ -88,10 +90,14 @@ namespace CustomControl
             {
                 // remove comma and character after comma
                 e.Handled = true;
-                int cursorPosition = this.SelectionStart;
+
+                // for maintain cursor position after delete
+                _FinishChange = false;
+                _CursorPosition = this.SelectionStart;
+                _CommaCount -=1;
+
                 string newText = this.Text.Substring(0, this.SelectionStart) + this.Text.Substring(this.SelectionStart + 2, this.Text.Length - (this.SelectionStart + 2));
                 this.Text = newText;
-                this.SelectionStart = cursorPosition + 1;
             }
 
             base.OnKeyDown(e);
@@ -99,8 +105,6 @@ namespace CustomControl
 
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
-            _Text = this.Text;
-
             // input first digit before 0
             _Value = TryParseDecimal(this.Text);
             if (_Value == 0 && this.SelectionStart == 0)
@@ -197,7 +201,7 @@ namespace CustomControl
                 base.OnTextChanged(e);
 
             }
-            catch
+            catch (Exception ex)
             {
                 if (!String.IsNullOrEmpty(this.Text))
                     this.Text = 0.ToString(_FormatString);
