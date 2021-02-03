@@ -33,7 +33,7 @@
             // 
             // decimalTextBox1
             // 
-            this.decimalTextBox1.FormatString = "{0:#,####0}";
+            this.decimalTextBox1.FormatString = "#,####0.0000";
             this.decimalTextBox1.Location = new System.Drawing.Point(91, 138);
             this.decimalTextBox1.Name = "decimalTextBox1";
             this.decimalTextBox1.Size = new System.Drawing.Size(100, 20);

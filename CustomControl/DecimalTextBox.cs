@@ -16,8 +16,9 @@ namespace CustomControl
         int _CursorPosition = -1;
         bool _FinishChange = true;
         string _Text;
+        int _DecimalDigit = 4;
 
-        string _FormatString = "{0:#,####0.0000}";
+        string _FormatString = "#,####0.0000";
         public string FormatString
         {
             get
@@ -27,13 +28,33 @@ namespace CustomControl
             set
             {
                 _FormatString = value;
-                this.Text = string.Format(_FormatString, 0);
+                _DecimalDigit = GetDecimalDigit(value);
+
+                RefreshValue();
+
             }
+        }
+
+        private void RefreshValue()
+        {
+            decimal val = decimal.Parse(this.Text.Replace(",", ""));
+            this.Text = val.ToString(_FormatString);
+        }
+
+        private int GetDecimalDigit(string format)
+        {
+            string result = 0.ToString(format);
+            int dotPosition = result.IndexOf('.');
+            if (dotPosition == -1)
+                return 0;
+
+            string afterDot = result.Substring(dotPosition + 1, result.Length - (dotPosition + 1));
+            return afterDot.Length;
         }
 
         public DecimalTextBox()
         {
-            this.Text = string.Format(FormatString, 0);
+            this.Text = 0.ToString(_FormatString);
         }
 
         protected override void OnTextChanged(EventArgs e)
@@ -50,12 +71,12 @@ namespace CustomControl
                 }
 
                 _FinishChange = false;
-              
 
-                decimal val = decimal.Parse(this.Text.Replace(",", "")); 
-                string text = string.Format(FormatString, val);
+
+                decimal val = decimal.Parse(this.Text.Replace(",", ""));
+                string text = Floor(val, _DecimalDigit).ToString(_FormatString);
                 int commaCount = GetCharCount(',', text);
-                
+
                 if (commaCount > _CommaCount)
                 {
                     _CursorPosition += 1;
@@ -85,9 +106,17 @@ namespace CustomControl
             }
             catch
             {
-                if(!String.IsNullOrEmpty(this.Text))
-                    this.Text = string.Format(FormatString, 0);
+                if (!String.IsNullOrEmpty(this.Text))
+                    this.Text = 0.ToString(_FormatString);
             }
+        }
+
+        public static decimal Floor(decimal aValue, int aDigits)
+        {
+            decimal m = (decimal)Math.Pow(10, aDigits);
+            aValue *= m;
+            aValue = Math.Floor(aValue);
+            return aValue / m;
         }
 
         private int GetCharCount(char c)
@@ -148,7 +177,7 @@ namespace CustomControl
                     int commaPosition = this.Text.IndexOf('.');
                     this.SelectionStart = commaPosition + 1;
                 }
-                
+
             }
 
             // prevent delete of dot by backspace
@@ -156,7 +185,7 @@ namespace CustomControl
             {
                 e.Handled = true;
 
-                if(this.SelectionStart >0)
+                if (this.SelectionStart > 0)
                     this.SelectionStart -= 1;
             }
 
