@@ -115,7 +115,7 @@ namespace CustomControl
         {
             decimal m = (decimal)Math.Pow(10, aDigits);
             aValue *= m;
-            aValue = Math.Floor(aValue);
+            aValue = (decimal)Math.Floor((double)aValue);
             return aValue / m;
         }
 
@@ -145,7 +145,7 @@ namespace CustomControl
             _Text = this.Text;
 
             // input first digit before 0
-            Decimal.TryParse(this.Text, out _Value);
+            _Value = TryParseDecimal(this.Text);
             if (_Value == 0 && this.SelectionStart == 0)
             {
                 this.Text = String.Empty;
@@ -191,6 +191,18 @@ namespace CustomControl
 
             base.OnKeyPress(e);
 
+        }
+
+        private void TryParseDecimal(string str)
+        {
+            try
+            {
+                return Decimal.Parse(str);
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
         }
     }
 
